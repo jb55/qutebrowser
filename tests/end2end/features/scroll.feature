@@ -340,6 +340,7 @@ Feature: Scrolling
 
     ## frame scrolling
 
+    @qtwebkit_skip: Not supported on qtwebkit
     Scenario: Scrolling pixel-wise in a frame
         When I open data/scroll/frame.html
         And I run :tab-only
@@ -347,6 +348,7 @@ Feature: Scrolling
         And I run :scroll-px 0 100
         Then the javascript message "scroll y px: 100" should be logged
 
+    @qtwebkit_skip: Not supported on qtwebkit
     Scenario: Scrolling to a position in a frame
         When I open data/scroll/frame.html
         And I run :tab-only
