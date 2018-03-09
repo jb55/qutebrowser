@@ -464,7 +464,8 @@ class WebEngineScroller(browsertab.AbstractScroller):
         self._tab.openurl(url)
 
     def delta(self, x=0, y=0):
-        self._tab.run_js_async(javascript.assemble('window', 'scrollBy', x, y))
+        js_code = javascript.assemble('scroll', 'delta_px', x, y)
+        self._tab.run_js_async(js_code)
 
     def delta_page(self, x=0, y=0):
         js_code = javascript.assemble('scroll', 'delta_page', x, y)
@@ -1013,6 +1014,26 @@ class WebEngineTab(browsertab.AbstractTab):
         super()._set_widget(widget)
         self._permissions._widget = widget
         self._scripts._widget = widget
+
+    def _init_js(self):
+        js_code = '\n'.join([
+            '"use strict";',
+            'window._qutebrowser = window._qutebrowser || {};',
+            utils.read_file('javascript/webelem.js'),
+            utils.read_file('javascript/scroll.js'),
+            utils.read_file('javascript/caret.js'),
+        ])
+        script = QWebEngineScript()
+        # We can't use DocumentCreation here as WORKAROUND for
+        # https://bugreports.qt.io/browse/QTBUG-66011
+        script.setInjectionPoint(QWebEngineScript.DocumentReady)
+        script.setSourceCode(js_code)
+
+        page = self._widget.page()
+        script.setWorldId(QWebEngineScript.ApplicationWorld)
+
+        # FIXME:qtwebengine  what about runsOnSubFrames?
+        page.scripts().insert(script)
 
     def _install_event_filter(self):
         fp = self._widget.focusProxy()
