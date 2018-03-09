@@ -337,3 +337,21 @@ Feature: Scrolling
         And I run :tab-next
         And I run :jseval --world main checkAnchor()
         Then "[*] [PASS] Positions equal: *" should be logged
+
+    ## frame scrolling
+
+    Scenario: Scrolling pixel-wise in a frame
+        When I open data/scroll/frame.html
+        And I run :tab-only
+        And I hint with args "all" and follow a
+        And I run :scroll-px 0 100
+        Then the javascript message "scroll y px: 100" should be logged
+
+    Scenario: Scrolling to a position in a frame
+        When I open data/scroll/frame.html
+        And I run :tab-only
+        And I hint with args "all" and follow a
+        And I run :scroll-px 0 100
+        And I wait for the javascript message "scroll y px: 100"
+        And I run :scroll-to-perc 0
+        Then the javascript message "scroll y px: 0" should be logged
