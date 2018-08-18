@@ -924,15 +924,19 @@ class CommandDispatcher:
         message.info("Zoom level: {}%".format(int(level)), replace=True)
 
     @cmdutils.register(instance='command-dispatcher', scope='window')
-    def tab_only(self, prev=False, next_=False, force=False):
+    def tab_only(self, prev=False, next_=False, force=False,
+                 keep_pinned=False, close_pinned=False):
         """Close all tabs except for the current one.
 
         Args:
             prev: Keep tabs before the current.
             next_: Keep tabs after the current.
-            force: Avoid confirmation for pinned tabs.
+            keep_pinned: Dont close pinned tabs
+            close_pinned: Close pinned tabs
+            force: Close pinned tabs (deprecated)
         """
         cmdutils.check_exclusive((prev, next_), 'pn')
+        cmdutils.check_exclusive((keep_pinned, close_pinned, force), 'kcf')
         cur_idx = self._tabbed_browser.widget.currentIndex()
         assert cur_idx != -1
 
@@ -942,24 +946,34 @@ class CommandDispatcher:
                         (prev and i < cur_idx) or
                         (next_ and i > cur_idx))
 
+        # force flag backwards compat
+        close_pins = force or close_pinned
+
+        if close_pins:
+            pinned = 'close'
+        elif keep_pinned:
+            pinned = 'keep'
+        else:
+            pinned = 'ask'
+
         # close as many tabs as we can
         first_tab = True
         pinned_tabs_cleanup = False
+
         for i, tab in enumerate(self._tabbed_browser.widgets()):
             if _to_close(i):
-                if force or not tab.data.pinned:
+                if not tab.data.pinned or close_pins:
                     self._tabbed_browser.close_tab(tab, new_undo=first_tab)
                     first_tab = False
                 else:
                     pinned_tabs_cleanup = tab
 
         # Check to see if we would like to close any pinned tabs
-        if pinned_tabs_cleanup:
+        if pinned_tabs_cleanup and pinned == 'ask':
             self._tabbed_browser.tab_close_prompt_if_pinned(
                 pinned_tabs_cleanup,
-                force,
-                lambda: self.tab_only(
-                    prev=prev, next_=next_, force=True),
+                close_pins,
+                lambda: self.tab_only(prev=prev, next_=next_, close_pinned=True),
                 text="Are you sure you want to close pinned tabs?")
 
     @cmdutils.register(instance='command-dispatcher', scope='window')
