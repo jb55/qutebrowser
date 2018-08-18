@@ -1538,6 +1538,11 @@ tabs.indicator.padding:
 tabs.width.pinned:
   deleted: true
 
+tabs.pinned.ignore_tab_only:
+  default: false
+  type: Bool
+  desc: Whether the tab_only command should ignore pinned tabs.
+
 tabs.pinned.shrink:
   default: true
   type: Bool

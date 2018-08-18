@@ -954,7 +954,7 @@ class CommandDispatcher:
                     pinned_tabs_cleanup = tab
 
         # Check to see if we would like to close any pinned tabs
-        if pinned_tabs_cleanup:
+        if not config.val.tabs.pinned.ignore_tab_only and pinned_tabs_cleanup:
             self._tabbed_browser.tab_close_prompt_if_pinned(
                 pinned_tabs_cleanup,
                 force,
