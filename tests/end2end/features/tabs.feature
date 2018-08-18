@@ -1206,7 +1206,24 @@ Feature: Tab management
         And I run :prompt-accept no
         Then the following tabs should be open:
             - data/numbers/1.txt (active) (pinned)
+
+    Scenario: Pinned :tab-only with tabs.pinned.ignore_tab_only = true
+        When I open data/numbers/1.txt
+        And I run :tab-pin
+        And I open data/numbers/2.txt in a new tab
+        And I run :tab-next
+        And I run :tab-pin
+        And I open data/numbers/3.txt in a new tab
+        And I run :tab-next
+        And I open data/numbers/4.txt in a new tab
+        And I run :tab-next
+        And I run :tab-only
+        And I run :prompt-accept yes
+        Then the error "This command is only allowed in prompt/yesno mode, not normal" should be shown
+        Then the following tabs should be open:
+            - data/numbers/1.txt (pinned)
             - data/numbers/2.txt (pinned)
+            - data/numbers/4.txt (active) (pinned)
 
     Scenario: Pinned :tab-only close all but pinned tab
         When I open data/numbers/1.txt
